@@ -18,17 +18,17 @@
             </div>
         </div>
 
-        <button class="carousel-control-prev" data-slide="prev" @click="showPrev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <button class="carousel-control-prev " data-slide="prev" @click="showPrev">
+            <span class="carousel-control-prev-icon " aria-hidden="true"></span>
             <span class="sr-only">Previous</span>
         </button>
 
         <button class="carousel-control-next" data-slide="next" @click="showNext">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="sr-only">Next</span>
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
         </button>
     </div>
-</template>
+    {{ currentIndex < items.length - 1 }} / {{ currentIndex }} / {{ items.length }}</template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
@@ -84,8 +84,12 @@ const items = reactive([
 ]);
 
 function showPrev() {
-    if (currentIndex.value == 0) { return; }
-    currentIndex.value--;
+    if (currentIndex.value == 0) {
+        currentIndex.value = items.length - 1;
+    }
+    else {
+        currentIndex.value--;
+    }
     updateItemClass();
 }
 
@@ -96,7 +100,6 @@ function showNext() {
 }
 
 function updateItemClass() {
-
     items.forEach((item, index) => {
         if (index - 1 === currentIndex.value) {
             item.class = "carousel-slide-right active";
@@ -105,23 +108,20 @@ function updateItemClass() {
             item.class = "carousel-slide-left active";
         }
         else if (index === currentIndex.value) {
-            items[index].class = "carousel-slide-active active"
+            item.class = "carousel-slide-active active"
         }
         else {
             item.class = "";
         }
     });
-}
 
-function slideActive() {
-    // for (let item of items) {
-    //     item.class = "carousel-slide-right";
+    // if (currentIndex.value == 0) {
+    //     items[items.length - 1].class = "carousel-slide-right active";
     // }
-    updateItemClass();
 }
 
 onMounted(() => {
-    slideActive()
+    updateItemClass();
 })
 </script>
 
