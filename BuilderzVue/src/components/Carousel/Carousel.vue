@@ -1,9 +1,9 @@
 <template>
     <div id="carousel" class="carousel-block slide" data-ride="carousel">
         <ol class="carousel-indicators">
-            <li data-target="#carousel" data-slide-to="0" class="active"></li>
-            <li data-target="#carousel" data-slide-to="1"></li>
-            <li data-target="#carousel" data-slide-to="2"></li>
+            <li v-for="(item, index) in items" :key="item.key" @click="updateCurrentSlide(index)"
+                :class="index == currentIndex ? 'active' : ''">
+            </li>
         </ol>
 
         <div class="carousel-inner">
@@ -99,6 +99,25 @@ function showNext() {
     updateItemClass();
 }
 
+function updateCurrentSlide(index) {
+    items.forEach((item) => {
+        item.class = "";
+    });
+
+    items[currentIndex.value].class = 'active carousel-hide';
+    items[index].class = 'active carousel-hide';
+
+    currentIndex.value = index;
+
+    setTimeout(() => {
+        items[currentIndex.value].class = ' carousel-show active';
+    }, 100);
+
+    setTimeout(() => {
+        updateItemClass();
+    }, 700);
+}
+
 function updateItemClass() {
     items.forEach((item, index) => {
         if (index - 1 === currentIndex.value) {
@@ -114,10 +133,6 @@ function updateItemClass() {
             item.class = "";
         }
     });
-
-    // if (currentIndex.value == 0) {
-    //     items[items.length - 1].class = "carousel-slide-right active";
-    // }
 }
 
 onMounted(() => {
