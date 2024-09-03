@@ -94,8 +94,12 @@ function showPrev() {
 }
 
 function showNext() {
-    if (currentIndex.value == items.length - 1) { return; }
-    currentIndex.value++;
+    if (currentIndex.value == items.length - 1) {
+        currentIndex.value = 0;
+    }
+    else {
+        currentIndex.value++;
+    }
     updateItemClass();
 }
 
@@ -107,15 +111,19 @@ function updateCurrentSlide(index) {
     items[currentIndex.value].class = 'active carousel-hide';
     items[index].class = 'active carousel-hide';
 
+    const currentIndexTemp = currentIndex.value;
     currentIndex.value = index;
 
     setTimeout(() => {
+        items[currentIndexTemp].class = '';
         items[currentIndex.value].class = ' carousel-show active';
+
+        setTimeout(() => {
+            updateItemClass();
+        }, 500);
     }, 100);
 
-    setTimeout(() => {
-        updateItemClass();
-    }, 700);
+
 }
 
 function updateItemClass() {
@@ -133,10 +141,20 @@ function updateItemClass() {
             item.class = "";
         }
     });
+
+    if (currentIndex.value == 0 && items.length > 1) {
+        items[items.length - 1].class = "carousel-slide-left active";
+    }
+    else if (currentIndex.value === items.length - 1) {
+        items[0].class = "carousel-slide-right active";
+    }
 }
 
 onMounted(() => {
     updateItemClass();
+    setInterval(() => {
+        showNext();
+    }, 10000);
 })
 </script>
 
