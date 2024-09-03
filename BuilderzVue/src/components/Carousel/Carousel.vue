@@ -28,7 +28,8 @@
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
         </button>
     </div>
-    {{ currentIndex < items.length - 1 }} / {{ currentIndex }} / {{ items.length }}</template>
+
+</template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
