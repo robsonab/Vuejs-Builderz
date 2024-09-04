@@ -1,0 +1,52 @@
+﻿@inject IContextModeResolver modeResolver
+
+@using Builderz.Business.ExtensionMethods
+@using Builderz.Models.Pages
+@using Builderz.Models.ViewModels
+@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@model IPageViewModel<SitePageData>
+
+@{
+    HelperResult ItemTemplate(HtmlHelpers.MenuItem item)
+    {
+        var active = item.Selected ? " active" : "";
+        
+        @if (item.Children.Any() == false)
+        {
+            @Html.PageLink(item.Page, null, new { @class = "nav-item nav-link" + active })
+        }
+        else
+        {
+            <div class="nav-item dropdown">                
+                <a href="#" class='nav-link dropdown-toggle + @active' data-toggle="dropdown">@item.Page.Name</a>
+                <div class="dropdown-menu">
+                    @foreach (var child in item.Children)
+                    {                        
+                        <a href='@child.LinkURL' class="dropdown-item">@child.Name</a>
+                    }
+                </div>
+            </div>
+        }
+
+        return new HelperResult(w => Task.CompletedTask);
+    }
+}
+
+<div class="nav-bar">
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+            <a href="#" class="navbar-brand">MENU</a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <div class="navbar-nav mr-auto">
+                    @Html.PageLink(Model.StartPage, null, new {@class = "nav-item nav-link " + (Model.CurrentPage.ContentLink.CompareToIgnoreWorkID(ContentReference.StartPage) ? " active" : null)})
+                    @Html.MenuList(ContentReference.StartPage, ItemTemplate)
+                </div>                
+            </div>
+        </nav>
+    </div>
+</div>

@@ -36,6 +36,11 @@ import { ref, reactive, onMounted } from 'vue';
 
 var currentIndex = ref(0);
 
+const url = `https://localhost:5010/api/Carousel/82`
+const data = await (await fetch(url)).json()
+
+console.log(data);
+
 const items = reactive([
     {
         key: 1,
