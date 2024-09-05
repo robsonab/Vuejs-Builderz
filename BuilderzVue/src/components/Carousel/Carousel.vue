@@ -1,18 +1,18 @@
 <template>
     <div id="carousel" class="carousel-block slide" data-ride="carousel">
         <ol class="carousel-indicators">
-            <li v-for="(item, index) in items" :key="item.key" @click="updateCurrentSlide(index)"
+            <li v-for="(item, index) in carouselData.slides" :key="item.key" @click="updateCurrentSlide(index)"
                 :class="index == currentIndex ? 'active' : ''">
             </li>
         </ol>
 
         <div class="carousel-inner">
-            <div :class="'carousel-item ' + item.class" v-for="(item) in items" :key="item.key">
-                <img :src="item.img" alt="Carousel Image">
+            <div :class="'carousel-item ' + item.class" v-for="(item) in carouselData.slides" :key="item.key">
+                <img :src="item.image" alt="Carousel Image">
                 <div class="carousel-caption">
-                    <p class="animated fadeInRight">{{ item.description }}
+                    <p class="animated fadeInRight">{{ item.subTitle }}
                     </p>
-                    <h1 class="animated fadeInLeft">{{ item.header }}</h1>
+                    <h1 class="animated fadeInLeft">{{ item.title }}</h1>
                     <a class="btn animated fadeInUp" :href="item.link">Get A Quote</a>
                 </div>
             </div>
@@ -20,78 +20,47 @@
 
         <button class="carousel-control-prev " data-slide="prev" @click="showPrev">
             <span class="carousel-control-prev-icon " aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
+            <span class="sr-only" v-if="carouselData.showTextLabels">{{ carouselData.previousText }}</span>
         </button>
 
         <button class="carousel-control-next" data-slide="next" @click="showNext">
-            <span class="sr-only">Next</span>
+            <span class="sr-only" v-if="carouselData.showTextLabels">{{ carouselData.nextText }}</span>
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
         </button>
     </div>
-
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watchEffect } from 'vue';
+import api from '@/API.js'
 
 var currentIndex = ref(0);
+var carouselData = reactive({
+    previousText: null,
+    nextText: null,
+    showTextLabels: false,
+    slides: []
+});
 
-const url = `https://localhost:5010/api/Carousel/82`
-const data = await (await fetch(url)).json()
+watchEffect(async () => {
+    const data = await api.getData('Carousel/82')
+        .then(data => {
+            data.slides.forEach((item, index) => {
+                item.key = index;
+                item.class = '';
+            });
+            return data;
+        })
 
-console.log(data);
+    Object.assign(carouselData, data);
 
-const items = reactive([
-    {
-        key: 1,
-        header: "For Your Dream Project",
-        description: "For Your Dream Project",
-        img: "/src/assets/img/carousel-1.jpg",
-        link: "#",
-        class: ""
-    },
-    {
-        key: 2,
-        header: "We Build Your Home",
-        description: "Professional Builder",
-        img: "/src/assets/img/carousel-2.jpg",
-        link: "#",
-        class: ""
-    }
-    , {
-        key: 3,
-        header: "For Your Dream Home",
-        description: "We Are Trusted",
-        img: "/src/assets/img/carousel-3.jpg",
-        link: "#",
-        class: ""
-    }, {
-        key: 4,
-        header: "heade 4",
-        description: "Description 4",
-        img: "/src/assets/img/blog-1.jpg",
-        link: "#",
-        class: ""
-    }, {
-        key: 5,
-        header: "heade 5",
-        description: "Description 5",
-        img: "/src/assets/img/blog-2.jpg",
-        link: "#",
-        class: ""
-    }, {
-        key: 6,
-        header: "heade 6",
-        description: "Description 6",
-        img: "/src/assets/img/blog-3.jpg",
-        link: "#",
-        class: ""
-    }
-]);
+    updateItemClass();
+
+})
 
 function showPrev() {
     if (currentIndex.value == 0) {
-        currentIndex.value = items.length - 1;
+        currentIndex.value = carouselData.slides.length - 1;
     }
     else {
         currentIndex.value--;
@@ -100,7 +69,7 @@ function showPrev() {
 }
 
 function showNext() {
-    if (currentIndex.value == items.length - 1) {
+    if (currentIndex.value == carouselData.slides.length - 1) {
         currentIndex.value = 0;
     }
     else {
@@ -110,19 +79,19 @@ function showNext() {
 }
 
 function updateCurrentSlide(index) {
-    items.forEach((item) => {
+    carouselData.slides.forEach((item) => {
         item.class = "";
     });
 
-    items[currentIndex.value].class = 'active carousel-hide';
-    items[index].class = 'active carousel-hide';
+    carouselData.slides[currentIndex.value].class = 'active carousel-hide';
+    carouselData.slides[index].class = 'active carousel-hide';
 
     const currentIndexTemp = currentIndex.value;
     currentIndex.value = index;
 
     setTimeout(() => {
-        items[currentIndexTemp].class = '';
-        items[currentIndex.value].class = ' carousel-show active';
+        carouselData.slides[currentIndexTemp].class = '';
+        carouselData.slides[currentIndex.value].class = ' carousel-show active';
 
         setTimeout(() => {
             updateItemClass();
@@ -133,7 +102,7 @@ function updateCurrentSlide(index) {
 }
 
 function updateItemClass() {
-    items.forEach((item, index) => {
+    carouselData.slides.forEach((item, index) => {
         if (index - 1 === currentIndex.value) {
             item.class = "carousel-slide-right active";
         }
@@ -148,20 +117,15 @@ function updateItemClass() {
         }
     });
 
-    if (currentIndex.value == 0 && items.length > 1) {
-        items[items.length - 1].class = "carousel-slide-left active";
+    if (currentIndex.value == 0 && carouselData.slides.length > 1) {
+        carouselData.slides[carouselData.slides.length - 1].class = "carousel-slide-left active";
     }
-    else if (currentIndex.value === items.length - 1) {
-        items[0].class = "carousel-slide-right active";
+    else if (currentIndex.value === carouselData.slides.length - 1) {
+        carouselData.slides[0].class = "carousel-slide-right active";
     }
+
 }
 
-onMounted(() => {
-    updateItemClass();
-    setInterval(() => {
-        showNext();
-    }, 10000);
-})
 </script>
 
 <style scoped lang="scss">
